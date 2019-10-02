@@ -21,6 +21,8 @@ var mongoose = require('mongoose'),
   https://adrianmejia.com/getting-started-with-node-js-modules-require-exports-imports-npm-and-beyond/
  */
 
+// ------------------------------------------------------------------ //
+
 /* Create a listing */
 exports.create = function(req, res) {
 
@@ -47,23 +49,51 @@ exports.create = function(req, res) {
   });
 };
 
+// ------------------------------------------------------------------ //
+
 /* Show the current listing */
 exports.read = function(req, res) {
   /* send back the listing as json from the request */
   res.json(req.listing);
 };
 
+// ------------------------------------------------------------------ //
+
 /* Update a listing - note the order in which this function is called by the router*/
 exports.update = function(req, res) {
   var listing = req.listing;
 
   /* Replace the listings's properties with the new properties found in req.body */
- 
+	var currentDate = new Date();
+	listing.updated_at = currentDate;
+  	listing.code = req.body.code;
+	listing.address = req.body.address;
+	listing.name = req.body.name;
+
+   
   /*save the coordinates (located in req.results if there is an address property) */
+  if(req.results) {
+    listing.coordinates = {
+      latitude: req.results.lat, 
+      longitude: req.results.lng
+    };
+  }
  
   /* Save the listing */
+  listing.save(function(err) {
+    if(err) {
+      console.log(err);
+      res.status(400).send(err);
+    } else {
+      res.json(listing);
+      console.log(listing)
+    }
+  });
 
 };
+
+
+// ------------------------------------------------------------------ //
 
 /* Delete a listing */
 exports.delete = function(req, res) {
@@ -71,12 +101,73 @@ exports.delete = function(req, res) {
 
   /* Add your code to remove the listins */
 
+	var paramsa = { _id: listing._id};
+  Listing.findByIdAndDelete( paramsa, function (err)
+  	{
+  		if (err) 
+  		{
+			// throw(err);
+  			res.status(400).send(err);
+  			console.log(err);
+  		}
+  		else
+  		{
+  			res.json(listing);
+  		}
+  	});
+
+/*
+	var paramsa = { _id: listing._id};
+	Listing.find(paramsa, function(err, deleteo)
+	{
+		if(err) 
+		{ 
+			throw err; 
+			res.status(400).send(err);
+		}
+		else
+		{
+		
+			Listing.deleteOne(paramsa, function (err, delets)
+			{
+				if (err) 
+				{ 
+					throw err; 
+					res.status(400).send(err);
+				}
+				else
+				{
+					console.log('\nDeletion success.\n');
+				}
+			});
+		}
+	});
+	*/
+
 };
+
+
+// ------------------------------------------------------------------ //
 
 /* Retreive all the directory listings, sorted alphabetically by listing code */
 exports.list = function(req, res) {
   /* Add your code */
+	Listing.find ({}, function(err, findAll) 
+	{
+		if (err)
+		{
+			res.status(400).send(err);
+//			console.log(err);
+		}
+		else
+		{
+			res.send(findAll);
+		}
+	});
+
 };
+
+// ------------------------------------------------------------------ //
 
 /* 
   Middleware: find a listing by its ID, then pass it to the next request handler. 

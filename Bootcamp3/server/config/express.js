@@ -7,6 +7,8 @@ var path = require('path'),
     listingsRouter = require('../routes/listings.server.routes'), 
     getCoordinates = require('../controllers/coordinates.server.controller.js');
 
+// ------------------------------------------------------------------ //
+
 module.exports.init = function() {
   //connect to database
   mongoose.connect(config.db.uri, { useNewUrlParser: true });
@@ -25,6 +27,8 @@ module.exports.init = function() {
   /* serve static files - see http://expressjs.com/en/starter/static-files.html */
   app.use('/', express.static(__dirname + '/../../client'));
 
+// ------------------------------------------------------------------ //
+
 /* The next three middleware are important to the API that we are bulding */
 
   /* Request Handler for route /api/lisings
@@ -32,8 +36,10 @@ module.exports.init = function() {
      use the listings router middleware for requests to the api 
      check the variables list above
   */
-  app.use('/api/listings');
+//  app.use('/api/listings');
+  app.use('/api/listings', listingsRouter);
 
+// ------------------------------------------------------------------ //
 
    /* Request Handler for coordinates
       This is a server wrapper around Open Cage Data Geocoding API to get latitude + longitude coordinates from address */
@@ -41,6 +47,7 @@ module.exports.init = function() {
     res.send(req.results);
   });
 
+// ------------------------------------------------------------------ //
 
   /* Request Handeler for all other routes
      Sends a response (res) to go to the homepage for all routes not specified */ 
@@ -53,6 +60,9 @@ module.exports.init = function() {
       If no path segments are passed, path.resolve() will return the absolute path of the current working directory.
    */
    //res.sendFile(path.resolve(...));
+   res.sendFile(path.resolve('client/index.html'));
+
+
   });
   
   return app;
